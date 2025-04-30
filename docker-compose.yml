@@ -1,0 +1,43 @@
+services:
+  n8n:
+    stdin_open: true
+    tty: true
+    container_name: n8n
+    networks:
+      - n8n
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+    image: docker.n8n.io/n8nio/n8n
+    env_file:
+      - .env
+    environment:  # Variables específicas para PostgreSQL
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres  # Nombre del servicio PostgreSQL
+      DB_POSTGRESDB_DATABASE: n8n_db  # Nombre de la BD
+      DB_POSTGRESDB_USER: postgres  # Usuario por defecto
+      DB_POSTGRESDB_PASSWORD: mysecretpassword  # Contraseña definida en Postgres
+    # command: start --tunnel
+
+  postgres:  # Corregir nombre del servicio (typo: "postgress")
+    image: postgres
+    container_name: postgres
+    networks:
+      - n8n
+    environment:
+      POSTGRES_DB: n8n_db  # Nombre de la BD
+      POSTGRES_USER: postgres  # Usuario (opcional, por defecto es "postgres")
+      POSTGRES_PASSWORD: mysecretpassword  # Contraseña
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # Volumen persistente
+    ports:
+      - "5432:5432"
+
+volumes:
+  n8n_data:  # Volumen para n8n
+  postgres_data:  # Volumen para PostgreSQL
+
+networks:
+  n8n:
+    external: false
